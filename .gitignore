@@ -243,3 +243,5 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/CapOutAppCalculator/MainWindow.xaml
+/CapOutAppCalculator/MainWindow.xaml.cs
