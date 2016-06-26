@@ -247,7 +247,7 @@ namespace CapOutAppCalculator
 
         private void Initialize()
         {
-            
+           
             NumberOfSquaresAmountText.Value = 0;
             MaterialBillAmountText.Value = 0;
             BringBackAmountText.Value = 0;
@@ -306,6 +306,9 @@ namespace CapOutAppCalculator
             TotalExpense();
             InitialDrawAmountText.Value = 500;
             SalespersonName.Focus();
+
+          
+
         }
 
 
