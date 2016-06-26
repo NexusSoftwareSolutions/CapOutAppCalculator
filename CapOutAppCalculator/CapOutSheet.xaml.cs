@@ -112,20 +112,21 @@ namespace CapOutAppCalculator
 		private void PrintButton_Click(object sender, RoutedEventArgs e)
 		{
 			PeekABoo();
-			MainWin.InvalidateArrange();
-			MainWin.InvalidateMeasure();
-			MainWin.InvalidateVisual();
-			Canvas.InvalidateArrange();
-			Canvas.InvalidateMeasure();
-			Canvas.InvalidateVisual();
-			MainWin.Width = MainWin.ActualWidth - 1;
+			//MainWin.InvalidateArrange();
+			//MainWin.InvalidateMeasure();
+			//MainWin.InvalidateVisual();
+			//Canvas.InvalidateArrange();
+			//Canvas.InvalidateMeasure();
+			//Canvas.InvalidateVisual();
+			//MainWin.Width = MainWin.ActualWidth - 1;
 
 		}
 
 		private void ClearButton_Click(object sender, RoutedEventArgs e)
 		{
-			Process.Start(Application.ResourceAssembly.Location);
-			Application.Current.Shutdown();
+            Initialize();
+			//Process.Start(Application.ResourceAssembly.Location);
+			//Application.Current.Shutdown();
 		}
 
 		#endregion
@@ -222,7 +223,7 @@ namespace CapOutAppCalculator
 		private double FigureRoofersBill(double NOS, bool isGA = true)
 		{
 
-			if (!isGA)
+			if ((bool)checkBox.IsChecked)
 				return NOS * 67.5;
 			else
 				return NOS * 56.25;
@@ -233,10 +234,10 @@ namespace CapOutAppCalculator
 		{
 			if (ReferralKnockerText.Text != string.Empty)
 			{
-				if (NOS > 0 && NOS < 40)
-					return 250;
-				else
-					return (Math.Floor(NOS / 40) + 1) * 250;
+                if (NOS < 40)
+                    return 250;
+                else
+                    return 500;
 			}
 			return 0;
 		}
@@ -244,69 +245,131 @@ namespace CapOutAppCalculator
 		
 		#region WorkFunctions
 
-		private void CapOutJob(double TotChk = 0, double TotExp = 0, double NoSq = 0, double splitvar = 50, double ohvar = 10, double smp = .25)
+        private void Initialize()
+        {
+            
+            NumberOfSquaresAmountText.Value = 0;
+            MaterialBillAmountText.Value = 0;
+            BringBackAmountText.Value = 0;
+          
+           
+            OriginalScopeAmountText.Value = 0;
+            FinalScopeAmount.Value = 0;
+            SettlementDifferenceAmount.Value = 0;
+            DeductibleCheckAmountText.Value = 0;
+            FirstCheckAmountText.Value = 0;
+            DepreciationAmountText.Value = 0;
+            UpgradeCheckAmountText.Value = 0;
+            SupplementCheckAmountText.Value = 0;
+            ReceiptAmount1Text.Value = 0;
+            ReceiptAmount2Text.Value = 0;
+            ReceiptAmount3Text.Value = 0;
+            ReceiptAmount4Text.Value = 0;
+            ReceiptAmount5Text.Value = 0;
+            SalespersonName.Text = string.Empty;
+            CustomerNameText.Text = string.Empty;
+            CustomerAddressText.Text = string.Empty;
+            ZipcodeText.Text = string.Empty;
+            SalespersonSplitText.PercentValue = 50;
+            OverheadMultiplierAmountText.PercentValue = 10;
+            if ((bool)SplitOverride.IsChecked)
+                SplitOverride.IsChecked = false;
+            if ((bool)OverheadOverride.IsChecked)
+            OverheadOverride.IsChecked = false;
+            if((bool)checkBox.IsChecked)
+            checkBox.IsChecked = false;
+            ReferralKnockerText.Text = string.Empty;
+            TotalAmountCollectedText.Value = 0;
+            TotalExpenseText.Value = 0;
+            OverheadAmountText.Value = 0;
+            MiscBillAmount.Value = 0;
+            KnockerReferralAmountText.Value = 0;
+            RoofLaborBillAmountText.Value = 0;
+            RoofMaterialExpenseSubtotalText.Value = 0;
+            AdjustedRoofSubtotalAmountText.Value = 0;
+            RecruiterText.Text = string.Empty;
+            CostPerSquareAmount.Value = 0;
+            ProfitPerSquareAmount.Value = 0;
+            ProfitAmountText.Value = 0;
+            AmountCollectedSubTotal.Value = 0;
+            SalespersonSplitAmountText.Value =0;
+            MRNAmountDueText.Value = 0;
+            SalespersonAmountDueText.Value = 0;
+           
+            TotalExpenseText.Value = 0;
+            GutterBillAmountText.Value = 0;
+            InteriorBillAmountText.Value = 0;
+            ExteriorBillAmountText.Value = 0;
+            RoofLaborBillAmountText.Value = 0;
+
+            ChecksTotal();
+            TotalExpense();
+            InitialDrawAmountText.Value = 500;
+            SalespersonName.Focus();
+        }
+
+
+		private void CapOutJob(double TotChk = 0, double TotExp = 0, double NoSq = 1, double splitvar = 50, double ohvar = 10, double smp = .25)
 		{
+            NoSq = (double)NumberOfSquaresAmountText.Value;
+            InitialDrawAmountText.Value = 500;
+            if (NoSq != 0)
+            {
+                double OH = TotChk * (ohvar * .01);
+                double RawProfit = TotalProfit();
+                double SalesProfit = RawProfit - (RawProfit * ((100 - splitvar) * .01));
+                double MRNSP = RawProfit - SalesProfit;
+                double SalesMP = OH * (smp * .01);
+                double MRNTP = MRNSP - SalesMP;
+                double CPSQ = 0;
+                double PPSQ = 0;
+                   
+                TotalAmountCollectedText.Value = (decimal)ChecksTotal();
+                TotalExpenseText.Value = (decimal)TotalExpense();
+                OverheadAmountText.Value = (decimal)OH;
+                MiscBillAmount.Value = (decimal)MiscCost();
+                KnockerReferralAmountText.Value = (decimal)FigureKnockerReferralFee(NoSq);
+                RoofLaborBillAmountText.Value = (decimal)FigureRoofersBill(NoSq, (bool)checkBox.IsChecked);
+                RoofMaterialExpenseSubtotalText.Value = (decimal)FigureJobMaterialCost();
+                AdjustedRoofSubtotalAmountText.Value = RoofMaterialExpenseSubtotalText.Value;
+                #region FigureSalesManagerPortion
+                if (RecruiterText.Text != string.Empty)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.Clear();
+                    if (SalespersonSplitText.PercentValue > 0)
+                        if (SalespersonName.Text != string.Empty)
+                        {
+                            string tempstring = RecruiterText.Text;
+                            if (tempstring.Contains(" "))
+                                sb.Append(tempstring.Substring(0, tempstring.IndexOf(" ")));
 
-			if (NoSq > 0)
-			{
-				NoSq = (double)NumberOfSquaresAmountText.Value;
+                            else sb.Append(RecruiterText.Text);
+                            sb.Append(" -- $");
+                            sb.Append(SalesMP);
+                            tempstring = sb.ToString();
 
-				double OH = TotChk * (ohvar * .01);
-				double RawProfit = TotalProfit();
-				double SalesProfit = RawProfit - (RawProfit * ((100 - splitvar) * .01));
-				double MRNSP = RawProfit - SalesProfit;
-				double SalesMP = OH * (smp * .01);
-				double MRNTP = MRNSP - SalesMP;
-				double CPSQ = 0;
-				double PPSQ = 0;
-				if (NoSq > 0)
-				{
-					CPSQ = TotExp / NoSq;
-					PPSQ = RawProfit / NoSq;
-				}
-				TotalAmountCollectedText.Value = (decimal)ChecksTotal();
-				TotalExpenseText.Value = (decimal)TotalExpense();
-				OverheadAmountText.Value = (decimal)OH;
+                            if (tempstring.Length - tempstring.IndexOf(".") > 2)
+                                RecruiterText.Text = tempstring.Substring(0, tempstring.IndexOf(".") + 3);
+                        }
+                }
+                #endregion
+                CostPerSquareAmount.Value = (decimal)CPSQ;
+                ProfitPerSquareAmount.Value = (decimal)PPSQ;
+                ProfitAmountText.Value = (decimal)RawProfit;
+                AmountCollectedSubTotal.Value = (decimal)ChecksTotal();
+                SalespersonSplitAmountText.Value = (decimal)SalesProfit;
+                MRNAmountDueText.Value = (decimal)MRNTP;
+               
+                SalespersonAmountDueText.Value = (decimal)SalesProfit - (decimal)InitialDrawAmountText.Value;
+                CPSQ = TotExp / NoSq;
+                CostPerSquareAmount.Value = (decimal)CPSQ;
+                PPSQ = RawProfit / NoSq;
+                ProfitPerSquareAmount.Value = (decimal)PPSQ; 
+            }
 
-				MiscBillAmount.Value = (decimal)MiscCost();
-				KnockerReferralAmountText.Value = (decimal)FigureKnockerReferralFee(NoSq);
-				RoofLaborBillAmountText.Value = (decimal)FigureRoofersBill(NoSq, (bool)!checkBox.IsChecked);
-				RoofMaterialExpenseSubtotalText.Value = (decimal)FigureJobMaterialCost();
-				AdjustedRoofSubtotalAmountText.Value = RoofMaterialExpenseSubtotalText.Value;
-				#region FigureSalesManagerPortion
-				if (RecruiterText.Text != string.Empty)
-				{
-					StringBuilder sb = new StringBuilder();
-					sb.Clear();
-					if (SalespersonSplitText.PercentValue > 0)
-						if (SalespersonName.Text != string.Empty)
-						{
-							string tempstring = RecruiterText.Text;
-							if (tempstring.Contains(" "))
-								sb.Append(tempstring.Substring(0, tempstring.IndexOf(" ")));
-
-							else sb.Append(RecruiterText.Text);
-							sb.Append(" -- $");
-							sb.Append(SalesMP);
-							tempstring = sb.ToString();
-
-							if (tempstring.Length - tempstring.IndexOf(".") > 2)
-								RecruiterText.Text = tempstring.Substring(0, tempstring.IndexOf(".") + 3);
-						}
-				}
-				#endregion
-				if (CostPerSquareAmount.Value > 0) CostPerSquareAmount.Value = 0;
-				CostPerSquareAmount.Value = (decimal)CPSQ;
-				if (ProfitPerSquareAmount.Value > 0) ProfitPerSquareAmount.Value = 0;
-				ProfitPerSquareAmount.Value = (decimal)PPSQ;
-				ProfitAmountText.Value = (decimal)RawProfit;
-				AmountCollectedSubTotal.Value = (decimal)ChecksTotal();
-				SalespersonSplitAmountText.Value = (decimal)SalesProfit;
-				MRNAmountDueText.Value = (decimal)MRNTP;
-				if (ProfitAmountText.Value > 0 && ProfitAmountText.Value != 500) InitialDrawAmountText.Value = 500;
-				else InitialDrawAmountText.Value = 500;
-				SalespersonAmountDueText.Value = (decimal)SalesProfit - (decimal)InitialDrawAmountText.Value;
-			}
+            else
+                MessageBox.Show("You can't divide by Zero (0) that's just retarded!", "Stupid People Doing Stupid Shit!", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 
 		}
 
